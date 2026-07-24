@@ -32,17 +32,21 @@ app.use(rateLimit({
 console.log("FRONTEND_URL =", process.env.FRONTEND_URL);
 // CORS configuration
 const allowedOrigins = [
-  "https://risk-management-system-orpin.vercel.app",
-  "https://risk-management-system-ieipgyv9o.vercel.app",
   "http://localhost:3000",
   "http://localhost:8080",
-];
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+// Every Vercel deployment (preview or prod) of this project gets its own
+// subdomain like risk-management-system-<hash>.vercel.app, so an exact
+// allowlist breaks on each new deploy. Match the project prefix instead.
+const allowedOriginPattern = /^https:\/\/risk-management-system-[\w-]+\.vercel\.app$/;
 
 app.use(cors({
   origin(origin, callback) {
     console.log("Incoming Origin:", origin);
 
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || allowedOriginPattern.test(origin)) {
       callback(null, true);
     } else {
       console.log("Blocked Origin:", origin);
