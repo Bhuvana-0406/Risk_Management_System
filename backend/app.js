@@ -31,15 +31,21 @@ app.use(rateLimit({
 
 console.log("FRONTEND_URL =", process.env.FRONTEND_URL);
 // CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "https://risk-management-system-ieipgyv9o.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:8080",
+];
+
 const corsOptions = {
-  origin: [
-    'http://localhost:8080',
-    'http://localhost:3000',
-    process.env.FRONTEND_URL, // Use environment variable
-  ].filter(Boolean), // Remove undefined values
-  credentials: true, // Allow cookies
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
