@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post('/login', validate(adminLoginSchema, 'body'), login);
 
-// router.post('/register', validate(adminRegisterSchema, 'body'), registerAdmin);
+router.post('/register', validate(adminRegisterSchema, 'body'), registerAdmin);
 
 router.post('/refresh-token', refreshAccessToken);
 
