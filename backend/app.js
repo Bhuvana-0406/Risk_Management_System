@@ -51,8 +51,15 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+
+app.options("*", cors({
+  origin: true,
+  credentials: true,
+}));
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.originalUrl}`);
