@@ -163,9 +163,17 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     console.log('✅ New access token generated for:', admin.email);
 
     res.status(200).json({
-      success: true,
-      data: { accessToken }
-    });
+  success: true,
+  data: {
+    accessToken,
+    admin: {
+      id: admin._id,
+      username: admin.username,
+      email: admin.email,
+      role: admin.role
+    }
+  }
+});
 
   } catch (error) {
     console.error('❌ Refresh token error:', error);
