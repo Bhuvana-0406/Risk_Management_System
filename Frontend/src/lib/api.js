@@ -24,9 +24,18 @@ const api = axios.create({
   },
 });
 
+let accessToken = null;
+
+export const setAccessToken = (token) => {
+  accessToken = token;
+};
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
     console.log(`📤 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
     return config;
   },
@@ -59,14 +68,16 @@ api.interceptors.response.use(
       try {
         console.log('🔄 Attempting to refresh access token...');
         const response = await api.post('/auth/refresh-token', {});
+        setAccessToken(response.data?.accessToken);
         console.log('✅ Access token refreshed successfully');
-        
+
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
         console.error('❌ Refresh token failed:', refreshError.response?.data?.message);
-        
+
         // Clear any stored user data and redirect to login
+        setAccessToken(null);
         localStorage.removeItem('user');
         window.location.href = '/login';
         
@@ -83,18 +94,23 @@ api.interceptors.response.use(
 export const adminLogin = async (data) => {
   console.log('🔐 Attempting admin login...');
   const response = await api.post('/auth/login', data);
+  setAccessToken(response.data?.accessToken);
   console.log('🍪 Cookies after login:', document.cookie);
   return response;
 };
 
 export const refreshAccessToken = async () => {
   console.log('🔄 Refreshing access token...');
-  return api.post('/auth/refresh-token', {});
+  const response = await api.post('/auth/refresh-token', {});
+  setAccessToken(response.data?.accessToken);
+  return response;
 };
 
 export const logout = async () => {
   console.log('🚪 Logging out...');
-  return api.post('/auth/logout', {});
+  const response = await api.post('/auth/logout', {});
+  setAccessToken(null);
+  return response;
 };
 
 // Other API functions...
