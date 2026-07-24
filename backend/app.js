@@ -43,16 +43,12 @@ app.use(cors({
     console.log("Incoming Origin:", origin);
 
     if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
+      callback(null, true);
+    } else {
+      console.log("Blocked Origin:", origin);
+      callback(new Error("Not allowed by CORS"));
     }
-
-    return callback(new Error(`Origin ${origin} not allowed`));
   },
-  credentials: true,
-}));
-
-app.use(cors({
-  origin: true,
   credentials: true,
 }));
 

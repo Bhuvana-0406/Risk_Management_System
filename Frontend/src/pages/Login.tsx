@@ -9,9 +9,33 @@ import { Shield, TrendingDown } from "lucide-react";
 
 import { adminLogin } from "../lib/api";
 
+const DEMO_EMAIL = "admin@ecommerce.com";
+const DEMO_PASSWORD = "admin123";
+const REMEMBERED_LOGIN_KEY = "rememberedLogin";
+
 const Login = () => {
-  const [emailOrUsername, setEmailOrUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [emailOrUsername, setEmailOrUsername] = useState(() => {
+    const remembered = localStorage.getItem(REMEMBERED_LOGIN_KEY);
+    if (remembered) {
+      try {
+        return JSON.parse(remembered).emailOrUsername ?? DEMO_EMAIL;
+      } catch {
+        return DEMO_EMAIL;
+      }
+    }
+    return DEMO_EMAIL;
+  });
+  const [password, setPassword] = useState(() => {
+    const remembered = localStorage.getItem(REMEMBERED_LOGIN_KEY);
+    if (remembered) {
+      try {
+        return JSON.parse(remembered).password ?? DEMO_PASSWORD;
+      } catch {
+        return DEMO_PASSWORD;
+      }
+    }
+    return DEMO_PASSWORD;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -22,7 +46,13 @@ const Login = () => {
 
     try {
       const response = await adminLogin({ emailOrUsername, password });
-      const admin = response.data.admin; 
+      const admin = response.data.admin;
+
+      localStorage.setItem(
+        REMEMBERED_LOGIN_KEY,
+        JSON.stringify({ emailOrUsername, password })
+      );
+
       toast({
         title: "Welcome back!",
         description: `Successfully logged into Return Risk Analyzer ${admin ? `as ${admin.username}` : ''}.`,
