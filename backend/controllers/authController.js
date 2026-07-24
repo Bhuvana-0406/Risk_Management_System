@@ -83,13 +83,17 @@ export const login = asyncHandler(async (req, res) => {
       }
     });
 
-  } catch (error) {
-    console.error('❌ Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
+ } catch (error) {
+  console.error("========== LOGIN ERROR ==========");
+  console.error(error);
+  console.error(error.stack);
+
+  return res.status(500).json({
+    success: false,
+    message: error.message,
+    stack: error.stack
+  });
+}
 });
 
 export const registerAdmin = asyncHandler(async (req, res) => {
