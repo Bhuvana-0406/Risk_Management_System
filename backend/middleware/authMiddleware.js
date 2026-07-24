@@ -5,14 +5,18 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 
 const protect = asyncHandler(async (req, res, next) => {
-    const token = req.cookies.accessToken; 
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
+
     if (!token) {
-        throw new ApiError(401, 'Unauthorized request: No access token found in cookies');
+        throw new ApiError(401, 'Unauthorized request: No access token found in Authorization header');
     }
 
     try {
-     
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         req.user = await Admin.findById(decodedToken.id).select('-password -refreshToken');
 
         if (!req.user) {

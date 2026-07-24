@@ -1,19 +1,23 @@
 import express from 'express';
-import { adminLogin, logoutAdmin, refreshAccessToken, registerAdmin } from '../controllers/authController.js';
+import {
+  login,
+  logout,
+  refreshAccessToken,
+  registerAdmin
+} from "../controllers/authController.js";
 import validate from '../middleware/validateMiddleware.js';
 import { adminLoginSchema, adminRegisterSchema } from '../validators/adminValidator.js';
-import { protect } from '../middleware/authMiddleware.js'; 
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/login', validate(adminLoginSchema, 'body'), adminLogin);
+router.post('/login', validate(adminLoginSchema, 'body'), login);
+
+router.post('/register', validate(adminRegisterSchema, 'body'), registerAdmin);
 
 router.post('/refresh-token', refreshAccessToken);
 
 
-router.post('/logout', protect, logoutAdmin);
-
-// Optional: Route for admin registration (use with caution, e.g., for initial setup)
-router.post('/register', validate(adminRegisterSchema, 'body'), registerAdmin);
+router.post('/logout', protect, logout);
 
 export default router;

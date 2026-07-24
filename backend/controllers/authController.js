@@ -5,20 +5,25 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const login = asyncHandler(async (req, res) => {
   try {
-    const { email, password } = req.body;
-    console.log('🔐 Login attempt for:', email);
+    const { emailOrUsername, password } = req.body;
+    console.log('🔐 Login attempt for:', emailOrUsername);
 
-    if (!email || !password) {
+    if (!emailOrUsername || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: 'Email/Username and password are required'
       });
     }
 
-    // Find admin by email
-    const admin = await Admin.findOne({ email }).select('+password');
+    // Find admin by email or username
+    const admin = await Admin.findOne({
+      $or: [
+        { email: emailOrUsername.toLowerCase() },
+        { username: emailOrUsername }
+      ]
+    }).select('+password');
     if (!admin) {
-      console.log('❌ Admin not found:', email);
+      console.log('❌ Admin not found:', emailOrUsername);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -28,7 +33,7 @@ export const login = asyncHandler(async (req, res) => {
     // Check password
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) {
-      console.log('❌ Invalid password for:', email);
+      console.log('❌ Invalid password for:', emailOrUsername);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -62,7 +67,7 @@ export const login = asyncHandler(async (req, res) => {
     // Set refresh token as httpOnly cookie
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
-    console.log('✅ Login successful for:', email);
+    console.log('✅ Login successful for:', emailOrUsername);
 
     res.status(200).json({
       success: true,
@@ -71,7 +76,7 @@ export const login = asyncHandler(async (req, res) => {
         accessToken,
         admin: {
           id: admin._id,
-          name: admin.name,
+          username: admin.username,
           email: admin.email,
           role: admin.role
         }
@@ -85,6 +90,33 @@ export const login = asyncHandler(async (req, res) => {
       message: 'Internal server error'
     });
   }
+});
+
+export const registerAdmin = asyncHandler(async (req, res) => {
+  const { username, email, password, role } = req.body;
+
+  const existingAdmin = await Admin.findOne({
+    $or: [{ email: email.toLowerCase() }, { username }]
+  });
+  if (existingAdmin) {
+    return res.status(409).json({
+      success: false,
+      message: 'An admin with this email or username already exists'
+    });
+  }
+
+  const admin = await Admin.create({ username, email, password, role });
+
+  res.status(201).json({
+    success: true,
+    message: 'Admin registered successfully',
+    data: {
+      id: admin._id,
+      username: admin.username,
+      email: admin.email,
+      role: admin.role
+    }
+  });
 });
 
 export const refreshAccessToken = asyncHandler(async (req, res) => {
