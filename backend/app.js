@@ -21,14 +21,19 @@ dotenv.config();
 const app = express();
 
 // --- Core Middleware ---
+// General API limiter: generous, and only counts failed requests so normal
+// dashboard usage doesn't eat into the budget and lock the user out of login.
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: 'Too many requests from this IP, please try again after 15 minutes',
+    max: 1000,
+    skipSuccessfulRequests: true,
+    message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' },
     standardHeaders: true,
     legacyHeaders: false,
 }));
 
+
+console.log("FRONTEND_URL =", process.env.FRONTEND_URL);
 // CORS configuration
 const corsOptions = {
   origin: [

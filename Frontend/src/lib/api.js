@@ -85,7 +85,12 @@ api.interceptors.response.use(
       }
     }
 
-    const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
+    const data = error.response?.data;
+    const errorMessage =
+      (typeof data === 'string' && data) ||
+      data?.message ||
+      error.message ||
+      'An unexpected error occurred';
     throw new Error(errorMessage);
   }
 );
