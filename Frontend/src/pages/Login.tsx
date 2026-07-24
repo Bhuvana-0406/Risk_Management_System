@@ -22,7 +22,7 @@ const Login = () => {
 
     try {
       const response = await adminLogin({ emailOrUsername, password });
-      const admin = response.admin; 
+      const admin = response.data.admin; 
       toast({
         title: "Welcome back!",
         description: `Successfully logged into Return Risk Analyzer ${admin ? `as ${admin.username}` : ''}.`,

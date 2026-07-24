@@ -92,10 +92,16 @@ api.interceptors.response.use(
 
 // API functions
 export const adminLogin = async (data) => {
-  console.log('🔐 Attempting admin login...');
   const response = await api.post('/auth/login', data);
-  setAccessToken(response.data?.accessToken);
-  console.log('🍪 Cookies after login:', document.cookie);
+
+  // response is already transformed by the interceptor
+  setAccessToken(response.data.accessToken);
+
+  localStorage.setItem(
+    "admin",
+    JSON.stringify(response.data.admin)
+  );
+
   return response;
 };
 
