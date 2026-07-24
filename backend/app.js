@@ -32,21 +32,24 @@ app.use(rateLimit({
 console.log("FRONTEND_URL =", process.env.FRONTEND_URL);
 // CORS configuration
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  "https://risk-management-system-orpin.vercel.app",
   "https://risk-management-system-ieipgyv9o.vercel.app",
   "http://localhost:3000",
   "http://localhost:8080",
 ];
 
-const corsOptions = {
+app.use(cors({
   origin(origin, callback) {
+    console.log("Incoming Origin:", origin);
+
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    callback(new Error(`Origin ${origin} not allowed by CORS`));
+
+    return callback(new Error(`Origin ${origin} not allowed`));
   },
   credentials: true,
-};
+}));
 
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
