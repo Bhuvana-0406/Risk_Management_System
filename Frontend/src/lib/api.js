@@ -78,7 +78,7 @@ api.interceptors.response.use(
 
         // Clear any stored user data and redirect to login
         setAccessToken(null);
-        localStorage.removeItem('user');
+        localStorage.removeItem('admin');
         window.location.href = '/login';
         
         throw new Error('Session expired. Please log in again.');
