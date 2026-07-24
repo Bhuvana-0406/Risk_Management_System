@@ -89,7 +89,21 @@ const AdminLayout = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await refreshAccessToken();
+        const storedAdmin = localStorage.getItem("admin");
+
+if (storedAdmin) {
+    const admin = JSON.parse(storedAdmin);
+
+    setAdminUser({
+        name: admin.username,
+        role: admin.role
+    });
+
+    return;
+}
+
+// Only if nothing is stored:
+const res = await refreshAccessToken();
         
         const { admin } = res.data; 
 
